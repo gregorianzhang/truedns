@@ -6,7 +6,7 @@ def main():
 
 	print "main"
 	#conf("truedns.py")
-	aa = conf("truedns.conf1")
+	aa = conf("truedns.conf")
 	aa.openconf()
 
 if __name__ == "__main__":
