@@ -17,7 +17,7 @@ def getconffile(filename):
 def rundns():
 
     dnss = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    dnss.bind(('',5311))
+    dnss.bind(('',53))
     while 1:
         data, addr = dnss.recvfrom(1024)
         print "data %s, addr %s" % (data,addr)
@@ -28,6 +28,35 @@ def rundns():
 #        print struct.unpack('>H',Flags)
         dnsinfo(data)
     #dnss.sendto(,addr)
+        tt=dnsresponse()
+        print "send data %s" % tt
+        dnss.sendto(tt,addr)
+
+def dnsresponse():
+    dd=""
+    print ID
+    COM = "\x81\x80"
+    print DNSOP
+    QDCOUNT = '\x00\x01'
+    ANCOUNT = '\x00\x01'
+    NSCOUNT = '\x00\x00'
+    ARCOUNT = '\x00\x01'
+    qdomain = '\xc0\x0c'
+    qtype = '\x00\x01'
+    qclass = '\x00\x01'
+    qttl = '\x00\x00\x0e\x10'
+    qlen = '\x00\x04'
+    qdata = '\xda\x01\x40\x21'
+
+    qrecode = '\x00'+'\x00\x29'+'\x02\x00'+'\x00'+'\x00'+'\x00\x00'+'\x00\x00'
+
+    dd = ID + COM + QDCOUNT + ANCOUNT + NSCOUNT + ARCOUNT
+    dd = dd + DNSQ + qdomain + qtype + qclass + qttl + qlen + qdata
+    dd = dd+ qrecode
+
+    print "dd data is %s" % dd
+    return dd
+
 def dnsname(data):
     domain=""
     num1 = struct.unpack('B',data[0:1])
@@ -49,6 +78,9 @@ def dnsname(data):
     QCLASS = struct.unpack('>H', data[start+2:start+2+2])
     print domain
     print "qtype %s, qclass %s" % (QTYPE, QCLASS)
+    global DNSQ
+    DNSQ = data[0:start+2+2]
+    print "DNSQ %s " % DNSQ
 
 
 def dnsinfo(data):
@@ -59,6 +91,9 @@ def dnsinfo(data):
 # OCTET 7,8 ANCOUNT
 # OCTET 9,10 NSCOUNT
 # OCTET 11,12 ARCOUNT
+    global ID 
+    global DNSOP
+    DNSOP = data[4:12]
     ID = data[0:2]
     COM = data[2:4]
     QDCOUNT = data[4:6]
