@@ -3,6 +3,7 @@
 import ConfigParser
 import socket
 import struct
+import time
 
 
 def getconffile(filename):
@@ -17,7 +18,7 @@ def getconffile(filename):
 def rundns():
 
     dnss = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    dnss.bind(('',53))
+    dnss.bind(('',5311))
     while 1:
         data, addr = dnss.recvfrom(1024)
         print "data %s, addr %s" % (data,addr)
@@ -29,8 +30,13 @@ def rundns():
         dnsinfo(data)
     #dnss.sendto(,addr)
         tt=dnsresponse()
+        dns1ser=('223.5.5.5',53)
         print "send data %s" % tt
-        dnss.sendto(tt,addr)
+        dnscc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        dnscc.sendto(data,dns1ser)
+        qdata,qaddr = dnscc.recvfrom(1024)
+
+        dnss.sendto(qdata,addr)
 
 def dnsresponse():
     dd=""
@@ -38,7 +44,8 @@ def dnsresponse():
     COM = "\x81\x80"
     print DNSOP
     QDCOUNT = '\x00\x01'
-    ANCOUNT = '\x00\x01'
+    #ANCOUNT = '\x00\x01'
+    ANCOUNT = '\x00\x03'
     NSCOUNT = '\x00\x00'
     ARCOUNT = '\x00\x01'
     qdomain = '\xc0\x0c'
@@ -48,13 +55,19 @@ def dnsresponse():
     qlen = '\x00\x04'
     qdata = '\xda\x01\x40\x21'
 
+    jj = qdomain + qtype + qclass + qttl + qlen + qdata
+
+
     qrecode = '\x00'+'\x00\x29'+'\x02\x00'+'\x00'+'\x00'+'\x00\x00'+'\x00\x00'
 
+    #dd = ID + COM + QDCOUNT + ANCOUNT + NSCOUNT + ARCOUNT
+    #dd = dd + DNSQ + qdomain + qtype + qclass + qttl + qlen + qdata
+    #dd = dd+ qrecode
     dd = ID + COM + QDCOUNT + ANCOUNT + NSCOUNT + ARCOUNT
-    dd = dd + DNSQ + qdomain + qtype + qclass + qttl + qlen + qdata
+    dd = dd + DNSQ + jj + jj
     dd = dd+ qrecode
 
-    print "dd data is %s" % dd
+    print "dd data is %r" % dd
     return dd
 
 def dnsname(data):
