@@ -4,6 +4,10 @@ import ConfigParser
 import logging
 import sys
 
+from lib.dns import dns
+from lib.control import control
+
+
 def getfile(filename):
     config = ConfigParser.ConfigParser()
     
@@ -19,9 +23,19 @@ def getfile(filename):
 
 def main():
     print "main"
+
+    logging.basicConfig(level = logging.DEBUG,
+    			format = "%(asctime)s %(filename)s %(levelname)s %(lineno)d %(name)s %(message)s",
+			filename = "truedns.log",
+			filemode = "a")
+
     fileconf = getfile('truedns.conf')
     print fileconf['level']
+    logging.debug('TTTT')
 
+    b = control.control()
+    b.run()
+	
 
 if __name__ == '__main__':
     main()
