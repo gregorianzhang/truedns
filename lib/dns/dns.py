@@ -1,10 +1,13 @@
 import logging
 import struct
+from lib.cache import cache
+import socket
+#from lib.server import server
 
 class dnsmessage(object):
     def __init__(self,data):
 	self.data = data
-	print data
+        self.blackdns = "4.4.4.4"
 
 # OCTET 1,2 ID
 # OCTET 3,4 QR(1 bit) + OPCODE(4 bit)+ AA(1 bit) + TC(1 bit) + RD(1 bit)+ RA(1 bit) +
@@ -26,6 +29,10 @@ class dnsmessage(object):
 
 
     def dnsname(self,data):
+        zz = cache.cachem()
+
+        logging.debug("dns header id %r " % data[0:2])
+	ID = data[0:2]
 	domain1 = ""
 	start = 13
 	num1 = struct.unpack('B', data[12:13])
@@ -45,10 +52,42 @@ class dnsmessage(object):
 	print domain1
 	domain = domain1[:len(domain1)-1]
 	print "len %s and start len %s " % (len(domain1),start+len(domain1))
-	#domaintype = struct.unpack('BB',data[start+len(domain1):start+len(domain1)+2])
-	print "data %r" % data[start+len(domain1):start+len(domain1)+2]
-	#print struct.unpack('>H',data[start+len(domain1):start+len(domain1)+2])
-	print "start %s" % start
-	#logging.debug('get dnsname %s type %r' % (domain,domaintype))
+	domaintype = struct.unpack('!H',data[start:start+2])[0]
+        print "domaintype %s" % domaintype
+
+	logging.debug('get dnsname %s type %s' % (domain,domaintype))
+
+        print "cache check %r" % zz.check(domain,domaintype)
+        if zz.check(domain,domaintype):
+            logging.debug("get cache")
+            cached = zz.get(domain,domaintype)
+            print "cached %r" % cached
+        else:
+            print "forword dns message"
+#            yy = server.server()
+#            yy.froword(data)
+            dnsserc=('223.5.5.5',53)
+            dnssc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            dnssc.sendto(data,dnsserc)
+            qdata,qaddr = dnssc.recvfrom(1024)
+            logging.debug("qdata %r qaddr %s" % (qdata,qaddr))
+            while qaddr[0] in self.blackdns:
+                qdata,qaddr = dnssc.recvfrom(1024)
+
+            zz.set(domain,domaintype,qdata)
+            cached = qdata
+            
+        qid= cached[0:2]
+        print "id %r qid %r" % (ID,qid)
+        cachedata = ID+cached[2:]
+        return cachedata
+
+
+
+
+
+
+
+
 
 

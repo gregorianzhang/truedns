@@ -4,7 +4,6 @@ import ConfigParser
 import logging
 import sys
 
-from lib.dns import dns
 from lib.control import control
 
 

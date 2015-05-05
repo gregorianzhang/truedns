@@ -10,13 +10,15 @@ class server(object):
     def server(self):
 	logging.debug("start server")
 	dnss = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	dnss.bind(('',5311))
+	dnss.bind(('172.18.102.2',53))
+        data1 = ""
 	while True:
-	    data, addr = dnss.recvfrom(1024)
-	    logging.debug("data is %s addr %s" % (data,addr))
-	    tt = dns.dnsmessage(data)
-	    tt.dnsheader(data)
-	    tt.dnsname(data)
-
+            data, addr = dnss.recvfrom(1024)
+            logging.debug("data is %r addr %s" % (data,addr))
+            tt = dns.dnsmessage(data)
+            ee=tt.dnsname(data)
+            logging.debug("ee %r" % ee)
+            
+            dnss.sendto(ee,addr)
 
 
