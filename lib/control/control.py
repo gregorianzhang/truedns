@@ -6,8 +6,8 @@ class control(object):
 	pass
 
     def run(self):
-	logging.debug('start control')
-	print "aaaaa"
+	#logging.debug('start control')
+	#print "aaaaa"
 	t = server.server()
 	print t
 	t.server()

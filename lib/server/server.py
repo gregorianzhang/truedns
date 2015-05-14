@@ -8,7 +8,7 @@ class server(object):
 
 
     def server(self):
-	logging.debug("start server")
+	#logging.debug("start server")
 	dnss = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	dnss.bind(('172.18.102.2',53))
         data1 = ""
@@ -17,7 +17,7 @@ class server(object):
             logging.debug("data is %r addr %s" % (data,addr))
             tt = dns.dnsmessage(data)
             ee=tt.dnsname(data)
-            logging.debug("ee %r" % ee)
+            #logging.debug("ee %r" % ee)
             
             dnss.sendto(ee,addr)
 

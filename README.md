@@ -27,3 +27,15 @@ dns server
 
 DNS 信息
 获取DNS数据进行解包和组包
+
+
+truedns.py 
+按最简单的方式，通过转发dns查询来做dns服务器
+
+truedns1.py
+实现了基本的dns服务器，能cache已经查询的域名。但是服务端还是会卡住。
+
+truedns2.py
+使用socketserver 来重写服务端，并且使用dnslib包
+
+

@@ -28,9 +28,9 @@ def main():
 			filename = "truedns.log",
 			filemode = "a")
 
-    fileconf = getfile('truedns.conf')
-    print fileconf['level']
-    logging.debug('TTTT')
+#    fileconf = getfile('truedns.conf')
+#    print fileconf['level']
+    #logging.debug('TTTT')
 
     b = control.control()
     b.run()
