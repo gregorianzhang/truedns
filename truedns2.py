@@ -7,18 +7,20 @@ import dnslib
 import os
 import socket,asyncore
 
+
 class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         data = self.request[0]
         if data == 'q\n':
             os._exit(0)
         con = Controller(data)
-        response=str(con.run())
+        response1=str(con.run())
+	response=data[:2]+response1[2:]
         socket = self.request[1]
         #cur_thread = threading.current_thread()
         #response = "{}: {}".format(cur_thread.name, data)
         #print "response %" % response
-        print "all data %r"  % response
+        #print "all data %r"  % response
         socket.sendto(response ,self.client_address)
 
 
@@ -27,19 +29,21 @@ class ThreadUDPServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
 
 class DnsCache(object):
 
+    cache={}
+    global cache
     def __init__(self):
-        self.cache={}
+	pass
 
     def set(self,qname,qtype,qdata):
-        self.cache[qname+"_"+qtype]=qdata
+        cache[qname+"_"+qtype]=qdata
 
     def get(self,qname,qtype):
-        return self.cache[qname+"_"+qtype]
+        return cache[qname+"_"+qtype]
 
     def check(self,qname,qtype):
         try:
-            print "qname %s and qtype %s" % (qname,qtype)
-            self.cache[qname+"_"+qtype]
+            #print "qname %s and qtype %s" % (qname,qtype)
+            cache[qname+"_"+qtype]
             return 1
         except KeyError:
             return 0
@@ -66,7 +70,7 @@ class SearchDns(object):
         self.server=('223.6.6.6',53)
         self.socket.settimeout(5.0)
         self.data = data
-        print "self.data %r" % self.data
+        #print "self.data %r" % self.data
         self.socket.sendto(self.data,self.server)
 
     def run(self):
@@ -78,7 +82,7 @@ class SearchDns(object):
                 pass
         #qdata,qaddr = self.socket.recvfrom(1024)
 
-        print "qdata1 %r,qaddr1 %r" % (qdata1,qaddr1)
+        #print "qdata1 %r,qaddr1 %r" % (qdata1,qaddr1)
         return qdata1
 
         
@@ -92,21 +96,18 @@ class Controller(object):
 
     def run(self):
         dns=DnsMessage(self.data)
-        cache=DnsCache()
-        if cache.check(dns.getdomain(),dns.gettype()):
-            print "1"*20
-            self.data1 = cache.get(dns.getdomain(),dns.gettype())
+        cache1=DnsCache()
+        if cache1.check(dns.getdomain(),dns.gettype()):
+            self.data1 = cache1.get(dns.getdomain(),dns.gettype())
             return self.data1
         else:
-            print "2"*20
             search = SearchDns(self.data)
             bb=search.run()
-            cache.set(dns.getdomain(),dns.gettype(),bb)
-            print "search %r" % bb
+            cache1.set(dns.getdomain(),dns.gettype(),bb)
             return bb
 
 if  __name__ == "__main__":
-    HOST, PORT = "172.18.102.2" , 5311
+    HOST, PORT = "0.0.0.0" , 53
     server = ThreadUDPServer((HOST,PORT),ThreadUDPRequestHandler)
     ip, port = server.server_address
 
