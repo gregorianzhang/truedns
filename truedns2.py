@@ -29,8 +29,8 @@ class ThreadUDPServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
 
 class DnsCache(object):
 
-    cache={}
     global cache
+    cache={}
     def __init__(self):
 	pass
 
