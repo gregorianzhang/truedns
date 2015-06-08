@@ -17,16 +17,16 @@ cache={}
 class hijacking(Thread):
     def __init__(self):
         Thread.__init__(self)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.server=(('8.8.8.8',53),('208.67.220.220',53))
-        self.socket.settimeout(5)
 
     def run(self):
         while True:
             self.hijacking = 0
             self.data = queue.get()
             #print "self.data %r" % self.data
+            self.server=(('8.8.8.8',53),('208.67.220.220',53))
             for x in self.server:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                self.socket.settimeout(5)
                 #print x
                 if self.hijacking == 1:
                     break
@@ -54,14 +54,15 @@ class hijacking(Thread):
 
 class tcpdns(Thread):
     def __init__(self,data):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = (('8.8.4.4',53),('208.67.222.222',443))
-        self.socket.settimeout(5)
+        pass
         self.data = data
 
     def run(self):
+        self.server = (('8.8.4.4',53),('208.67.222.222',443))
         for x in self.server:
             #print x
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.settimeout(5)
             try:
                 self.socket.connect(x)
                 dnslen = struct.pack('>H',len(self.data))
@@ -79,6 +80,11 @@ class tcpdns(Thread):
                     cache[str(reqa.q.qname)+"_"+str(reqa.q.qtype)] = dnsq[2:]
                     self.socket.close()
                     break
+                else:
+                    pass
+                    #print "dnsq is null"
+                    
+                #print "3" * 10
             except:
                 pass
 
@@ -253,7 +259,7 @@ class Controller(object):
 
 if  __name__ == "__main__":
     blacklist =[]
-    HOST, PORT = "172.18.102.2" , 53
+    HOST, PORT = "0.0.0.0" , 53
     server = ThreadUDPServer((HOST,PORT),ThreadUDPRequestHandler)
     ip, port = server.server_address
 
