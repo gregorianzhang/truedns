@@ -99,10 +99,10 @@ class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
         if data == 'q\n':
             os._exit(0)
         #try:
-        print "data %r" % data 
+        #print "data %r" % data 
 #            print "data %s" % self.request
         (h,a) = self.client_address
-        print "client addr %s %s" % (h,a)
+        #print "client addr %s %s" % (h,a)
         #except:
         #    pass
         con = Controller(data)
