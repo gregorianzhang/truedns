@@ -29,6 +29,7 @@ class hijacking(Thread):
                 self.socket.settimeout(5)
                 #print x
                 if self.hijacking == 1:
+                    self.socket.close()
                     break
                 self.socket.sendto(self.data,x)
                 start = time.time()
