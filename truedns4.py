@@ -45,12 +45,14 @@ class hijacking(Thread):
                         except:
                             pass
     
+                self.socket.close()
                 if len(temp) > 1:
                     #print "This is hijacking dns %s" % temp
                     self.hijacking = 1
                     tt= tcpdns(self.data)
                     tt.run()
                     break
+
 
 class tcpdns(Thread):
     def __init__(self,data):
@@ -87,7 +89,7 @@ class tcpdns(Thread):
                 #print "3" * 10
             except:
                 pass
-
+            self.socket.close()
 
 
 class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
@@ -95,6 +97,13 @@ class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
         data = self.request[0]
         if data == 'q\n':
             os._exit(0)
+        #try:
+        print "data %r" % data 
+#            print "data %s" % self.request
+        (h,a) = self.client_address
+        print "client addr %s %s" % (h,a)
+        #except:
+        #    pass
         con = Controller(data)
         response1=str(con.run())
 	response=data[:2]+response1[2:]
@@ -172,6 +181,7 @@ class SearchDns(object):
 
         #print "domain %s " % dir(reqa.q)
         #print "domain %s and type %s" % (reqa.q.qname,reqa.q.qtype)
+        self.socket.close()
         return qdata1
 
 #    def run(self):
@@ -259,7 +269,7 @@ class Controller(object):
 
 if  __name__ == "__main__":
     blacklist =[]
-    HOST, PORT = "0.0.0.0" , 53
+    HOST, PORT = "172.18.102.2" , 53
     server = ThreadUDPServer((HOST,PORT),ThreadUDPRequestHandler)
     ip, port = server.server_address
 
