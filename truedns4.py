@@ -10,9 +10,14 @@ import time
 import struct
 from Queue import Queue
 from threading import Thread
+import collections
+import pickle
+
 
 queue=Queue(1000)
-cache={}
+#cache={}
+global n 
+n=0
 
 class hijacking(Thread):
     def __init__(self):
@@ -94,10 +99,15 @@ class tcpdns(Thread):
 
 
 class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
+
     def handle(self):
         data = self.request[0]
+        global n       
         if data == 'q\n':
             os._exit(0)
+        else:
+            n += 1
+
         #try:
         #print "data %r" % data 
 #            print "data %s" % self.request
@@ -105,6 +115,12 @@ class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
         #print "client addr %s %s" % (h,a)
         #except:
         #    pass
+        #print n
+        if n > 100:
+            aa=DnsCache()
+            aa.save()
+            n=0
+
         con = Controller(data)
         response1=str(con.run())
 	response=data[:2]+response1[2:]
@@ -121,14 +137,25 @@ class ThreadUDPServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
 
 class DnsCache(object):
 
+    global cache_size
+    cache_size = 5000
     global cache
+    cache = collections.OrderedDict()
+
     def __init__(self):
-	pass
+#	pass
+        self.open()
+
 
     def set(self,qname,qtype,qdata):
-        cache[qname+"_"+qtype]=qdata
+        if len(cache) > cache_size:
+            cache.popitem(last=False)
+        else:
+            cache[qname+"_"+qtype]=qdata
 
     def get(self,qname,qtype):
+        value = cache.pop(qname+"_"+qtype)
+        cache[qname+"_"+qtype] = value
         return cache[qname+"_"+qtype]
 
     def check(self,qname,qtype):
@@ -139,6 +166,25 @@ class DnsCache(object):
             return 1
         except KeyError:
             return 0
+
+    def save(self):
+        with open('dns_cache.data','wb+') as f:
+            data = pickle.dumps(cache)
+            f.write(data)
+
+    def open(self):
+        try:
+            with open('dns_cache.data', 'rb+') as f:
+                data = f.read()
+        except:
+            data=''
+        finally:
+
+            if data == '':
+                pass
+            else:
+                cache = pickle.loads(data)
+
 
 class DnsMessage(object):
     def __init__(self,data):
@@ -254,6 +300,8 @@ class Controller(object):
     def run(self):
         dns=DnsMessage(self.data)
         cache1=DnsCache()
+        print cache
+        n=0
         #print "cache1 %r" % cache1
         if cache1.check(dns.getdomain(),dns.gettype()):
             self.data1 = cache1.get(dns.getdomain(),dns.gettype())
@@ -270,7 +318,7 @@ class Controller(object):
 
 if  __name__ == "__main__":
     blacklist =[]
-    HOST, PORT = "172.18.102.2" , 53
+    HOST, PORT = "0.0.0.0" , 5311
     server = ThreadUDPServer((HOST,PORT),ThreadUDPRequestHandler)
     ip, port = server.server_address
 
