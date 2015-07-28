@@ -300,7 +300,7 @@ class Controller(object):
     def run(self):
         dns=DnsMessage(self.data)
         cache1=DnsCache()
-        print cache
+        #print cache
         n=0
         #print "cache1 %r" % cache1
         if cache1.check(dns.getdomain(),dns.gettype()):
