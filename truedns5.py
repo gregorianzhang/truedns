@@ -5,6 +5,7 @@ import SocketServer
 import threading
 import dnslib
 import os
+import sys
 import socket,asyncore
 import time
 import struct
@@ -116,7 +117,7 @@ class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
         #except:
         #    pass
         #print n
-        if n > 100:
+        if n > 1000:
             aa=DnsCache()
             aa.save()
             n=0
@@ -141,6 +142,8 @@ class DnsCache(object):
     cache_size = 5000
     global cache
     cache = collections.OrderedDict()
+    global path
+    path = sys.path[0]
 
     def __init__(self):
 #	pass
@@ -168,13 +171,14 @@ class DnsCache(object):
             return 0
 
     def save(self):
-        with open('dns_cache.data','wb+') as f:
+        with open(path + '/dns_cache.data_tmp','wb+') as f:
             data = pickle.dumps(cache)
             f.write(data)
+	    os.rename(path + '/dns_cache.data_tmp' , path + '/dns_cache.data')
 
     def open(self):
         try:
-            with open('dns_cache.data', 'rb+') as f:
+            with open(path + '/dns_cache.data', 'rb+') as f:
                 data = f.read()
         except:
             data=''
@@ -318,7 +322,7 @@ class Controller(object):
 
 if  __name__ == "__main__":
     blacklist =[]
-    HOST, PORT = "0.0.0.0" , 5311
+    HOST, PORT = "192.168.1.100" , 53
     server = ThreadUDPServer((HOST,PORT),ThreadUDPRequestHandler)
     ip, port = server.server_address
 
