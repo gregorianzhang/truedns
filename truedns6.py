@@ -177,7 +177,7 @@ class DnsCache(object):
         with open(self.path + '/dns_cache.data_tmp','wb+') as f:
             data = pickle.dumps(self.cache)
             f.write(data)
-	    os.rename(self.path + '/dns_cache.data_tmp' , path + '/dns_cache.data')
+	    os.rename(self.path + '/dns_cache.data_tmp' , self.path + '/dns_cache.data')
 
     def open(self):
         global data
