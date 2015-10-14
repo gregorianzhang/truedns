@@ -56,14 +56,15 @@ class hijacking(Thread):
                 if len(temp) > 1:
                     #print "This is hijacking dns %s" % temp
                     self.hijacking = 1
-                    tt= tcpdns(self.data)
+                    
+                    tt = tcpdns(self.data)
                     tt.run()
                     break
 
 
 class tcpdns(Thread):
     def __init__(self,data):
-        pass
+        #print "tcpdns init"
         self.data = data
 
     def run(self):
@@ -81,13 +82,24 @@ class tcpdns(Thread):
                 if dnsq:
                     #print "domain %s and type %s and data %r" % (reqa.q.qname,reqa.q.qtype,dnsq[2:])
                     #print "cache %s"% cache
+                    #print "in here"
                     try:
                         bb= dnslib.DNSRecord.parse(dnsq[2:])
+                        #print "bb %s" % bb
                     except:
                         continue
+
                     #print "server ip rdata %s" % bb.a.rdata
-                    cache[str(reqa.q.qname)+"_"+str(reqa.q.qtype)] = dnsq[2:]
+                    #print "reqa.q.qname %s" % str(reqa.q.qname)
+                    #print "reqa.q.qtype %s" % str(reqa.q.qtype)
+                    #print "data %s" % dnsq[2:]
+
+                    #cache[str(reqa.q.qname)+"_"+str(reqa.q.qtype)] = dnsq[2:]
+                    #print cache1
+                    cache1.set(str(reqa.q.qname),str(reqa.q.qtype),dnsq[2:])
+                    #print "cache domain %s and data %s "% (str(reqa.q.qname)+"_"+str(reqa.q.qtype), dnsq[2:])
                     self.socket.close()
+                    #print "end"
                     break
                 else:
                     pass
@@ -96,6 +108,7 @@ class tcpdns(Thread):
                 #print "3" * 10
             except:
                 pass
+                #print "haha"
             self.socket.close()
 
 
@@ -118,8 +131,7 @@ class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
         #    pass
         #print n
         if n > 1000:
-            aa=DnsCache()
-            aa.save()
+            cache1.save()
             n=0
 
         con = Controller(data)
@@ -333,7 +345,7 @@ class Controller(object):
 
 if  __name__ == "__main__":
     blacklist =[]
-    HOST, PORT = "192.168.1.100" , 53
+    HOST, PORT = "172.18.102.2" , 5311
     server = ThreadUDPServer((HOST,PORT),ThreadUDPRequestHandler)
     ip, port = server.server_address
 
