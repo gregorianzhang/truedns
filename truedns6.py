@@ -119,30 +119,32 @@ class ThreadUDPRequestHandler(SocketServer.BaseRequestHandler):
         global n       
         if data == 'q\n':
             os._exit(0)
+        elif data[:2] == 'd ':
+            cache1.delete(data[2:][:len(data[2:])-1])
         else:
             n += 1
 
         #try:
         #print "data %r" % data 
 #            print "data %s" % self.request
-        (h,a) = self.client_address
+            (h,a) = self.client_address
         #print "client addr %s %s" % (h,a)
         #except:
         #    pass
         #print n
-        if n > 1000:
-            cache1.save()
-            n=0
+            if n > 1000:
+                cache1.save()
+                n=0
 
-        con = Controller(data)
-        response1=str(con.run())
-	response=data[:2]+response1[2:]
-        socket = self.request[1]
+            con = Controller(data)
+            response1=str(con.run())
+	    response=data[:2]+response1[2:]
+            socket = self.request[1]
         #cur_thread = threading.current_thread()
         #response = "{}: {}".format(cur_thread.name, data)
         #print "response %" % response
         #print "all data %r"  % response
-        socket.sendto(response ,self.client_address)
+            socket.sendto(response ,self.client_address)
 
 
 class ThreadUDPServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
@@ -161,10 +163,21 @@ class DnsCache(object):
 
     def set(self,qname,qtype,qdata):
 	print "set cache %s number" % len(self.cache)
+        print "set qname  %s qtype %s self.cache[qname+\"_\"+qtype] %s" %(qname,qtype,qdata)
         if len(self.cache) > self.cache_size:
             self.cache.popitem(last=False)
         else:
             self.cache[qname+"_"+qtype]=qdata
+
+    def delete(self,qname_qtype):
+        print "del defore cache %s number " % len(self.cache)
+        for temp_j in self.cache:
+            print self.cache[temp_j]
+        self.cache.pop(qname_qtype)
+        print "del after cache %s number " % len(self.cache)
+        for temp_j in self.cache:
+            print self.cache[temp_j]
+
 
     def get(self,qname,qtype):
 	print "get cache %s number" % len(self.cache)
@@ -345,7 +358,7 @@ class Controller(object):
 
 if  __name__ == "__main__":
     blacklist =[]
-    HOST, PORT = "172.18.102.2" , 5311
+    HOST, PORT = "172.18.102.13" , 53
     server = ThreadUDPServer((HOST,PORT),ThreadUDPRequestHandler)
     ip, port = server.server_address
 
