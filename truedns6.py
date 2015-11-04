@@ -170,13 +170,13 @@ class DnsCache(object):
             self.cache[qname+"_"+qtype]=qdata
 
     def delete(self,qname_qtype):
-        print "del defore cache %s number " % len(self.cache)
-        for temp_j in self.cache:
-            print self.cache[temp_j]
+        #print "del defore cache %s number " % len(self.cache)
+        #for temp_j in self.cache:
+        #    print self.cache[temp_j]
         self.cache.pop(qname_qtype)
         print "del after cache %s number " % len(self.cache)
-        for temp_j in self.cache:
-            print self.cache[temp_j]
+        #for temp_j in self.cache:
+        #    print self.cache[temp_j]
 
 
     def get(self,qname,qtype):
