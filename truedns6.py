@@ -163,9 +163,14 @@ class DnsCache(object):
 
     def set(self,qname,qtype,qdata):
 	print "set cache %s number" % len(self.cache)
-        print "set qname  %s qtype %s self.cache[qname+\"_\"+qtype] %s" %(qname,qtype,qdata)
+        #print "set qname  %s qtype %s self.cache[qname+\"_\"+qtype] %s" %(qname,qtype,qdata)
+        
         if len(self.cache) > self.cache_size:
             self.cache.popitem(last=False)
+        elif qtype == 12:
+            pass
+        elif qtype == 28:
+            pass
         else:
             self.cache[qname+"_"+qtype]=qdata
 
